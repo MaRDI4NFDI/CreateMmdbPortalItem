@@ -1,7 +1,7 @@
 **Abstract** 
 
 Repository for a navigation menu to create items in Wikibase with predefined entries, i.e. a predefined "community" or "instance of" something. 
-This particular navigation menu is for creating MaRDI [https://portal.mardi4nfdi.de/wiki/MathModDB MathModDB] items (all types) in the MaRDI Portal with predefined values and and duplicate label check.
+This particular navigation menu is for creating MaRDI [MathModDB](https://portal.mardi4nfdi.de/wiki/MathModDB) items (all types) in the MaRDI Portal with predefined values and and duplicate label check.
 
 
 Here are the specific presets for MathModDB Items: 
