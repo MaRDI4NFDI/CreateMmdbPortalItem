@@ -1,8 +1,10 @@
-= Abstract = 
+**Abstract** 
 
 Repository for a navigation menu to create items in Wikibase with predefined entries, i.e. a predefined community or "instance od" something. 
 This particular navigation menu is for creating MaRDI [https://portal.mardi4nfdi.de/wiki/MathModDB MathModDB] items (all types) in the MaRDI Portal with predefined values and and duplicate label check.
 
+
+Here are the specific presets for MathModDB Items: 
 | Type                    | instance of | MaRDI ... Profile |
 | ----------------------- | ----------- | ----------------- |
 | Academic discipline     | Q60231      | Q6534268          |
@@ -13,12 +15,13 @@ This particular navigation menu is for creating MaRDI [https://portal.mardi4nfdi
 | Research problem        | Q6534292    | Q6534269          |
 | Computational task      | Q6534247    | Q6534272          |
 
-= Usage =
+**Usage**
 
 Just put the contents of 'createPreDefMenu_common.js' into your common.js of the Wikibase
 
 
-= Authors =
+**Authors**
 
 Björn Schembera / bjoern.schembera@mathematik.uni-stuttgart.de
+
 Aurela Shehu / shehu@wias-berlin.de
