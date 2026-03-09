@@ -1,7 +1,7 @@
 /* 
 
 Navigation menu for creating MaRDI items (all types) in the MaRDI Portal 
-with predefined values and and duplicate label check.
+with predefined values, duplicate label and login check.
 
 Code by Björn Schembera & Aurela Shehu within the MaRDI project.
 
@@ -34,14 +34,53 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
   // Set to false to check all languages for duplicates
   var MARDI_DUPLICATE_CHECK_STRICT_EN = true;
 
+  // Login helper using config variable; avoids relying on mw.user which might not
+  // be initialised early. wgUserId is '0' for anon users.
+  function userIsLoggedIn() {
+    var id = mw.config.get('wgUserId');
+    return id && id !== '0';
+  }
+
   // UI SETUP: Wait for the sidebar to load, then inject the dropdown menu
   // Use setInterval to poll for nav-items since they may not be immediately available
   var sidebarInterval = setInterval(function() {
     var navItems = document.getElementsByClassName('nav-item');
-    if (!navItems || navItems.length === 0) return;  // Sidebar not ready yet, try again
-    
-    var sidebarContainer = navItems[0].parentNode;
-    if (!sidebarContainer) return;  // Parent container not found, try again
+    var sidebarContainer = null;
+
+    // Detect skin early so we can adapt UI accordingly
+    var skin = (typeof mw !== 'undefined' && mw.config) ? (mw.config.get('skin') || '') : '';
+    var isVector = skin.indexOf && skin.indexOf('vector') !== -1;
+
+    // Prefer existing nav-item container (works for Chameleon)
+    if (navItems && navItems.length > 0) {
+      sidebarContainer = navItems[0].parentNode;
+    }
+
+    console.log('ProductionPortalMenu: detected skin=', skin, 'isVector=', isVector);
+
+    // Fallbacks for other skins: try a list of likely sidebar selectors
+    if (!sidebarContainer) {
+      var candidates = [
+        document.querySelector('#mw-panel'),
+        document.querySelector('.mw-sidebar'),
+        document.querySelector('.vector-menu'),
+        document.querySelector('.vector-menu-content'),
+        document.querySelector('nav[role="navigation"]'),
+        document.querySelector('aside'),
+        document.querySelector('.mw-portlet'),
+        document.querySelector('#p-navigation')
+      ];
+      for (var c = 0; c < candidates.length; c++) {
+        if (candidates[c]) { sidebarContainer = candidates[c]; break; }
+      }
+      if (!sidebarContainer) {
+        var alt = document.querySelector('.page-sidebar, .menu, .menu__list');
+        if (alt) sidebarContainer = alt;
+      }
+    }
+
+    var useFloatingFallback = (!sidebarContainer);
+    console.log('ProductionPortalMenu: sidebarContainer=', sidebarContainer, 'useFloatingFallback=', useFloatingFallback);
 
     clearInterval(sidebarInterval);  // Stop polling once sidebar is found
 
@@ -49,14 +88,15 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
     // Main dropdown container - positioned relative so submenu can be absolutely positioned
     var container = document.createElement('div');
     container.id = linkId;
-    container.className = 'nav-item mw-list-item';
+    // Use existing skin classes where helpful, fall back to generic ones
+    container.className = isVector ? 'vector-menu mw-list-item' : 'nav-item mw-list-item';
     container.style.position = 'relative'; // needed for dropdown positioning
 
     // Main link/trigger - clicking this toggles submenu visibility
     var mainLink = document.createElement('span');
-    mainLink.className = 'nav-link';
+    mainLink.className = isVector ? 'vector-menu-heading' : 'nav-link';
     mainLink.style.cursor = 'pointer';
-    mainLink.appendChild(document.createTextNode('Create MathModDB Item'));
+    mainLink.appendChild(document.createTextNode('MathModDB'));
     container.appendChild(mainLink);
 
     // Submenu container - appears below main link, hidden by default
@@ -80,7 +120,7 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
     betaNote.style.color = '#333';
     betaNote.style.borderBottom = '1px solid #eee';
     betaNote.style.backgroundColor = '#fafafa';
-    betaNote.innerHTML = 'This is a beta version. Be careful and <a href="https://github.com/MaRDI4NFDI/MaRDIRoadmap/issues/105" target="_blank" rel="noopener noreferrer">report bugs to us</a>.';
+    betaNote.innerHTML = 'Create new item...';
     submenu.appendChild(betaNote);
 
     // MENU ITEMS: Define which item types can be created
@@ -112,19 +152,145 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
       link.onmouseout = function() { this.style.backgroundColor = '#fff'; };
       
       // Bind the click handler using IIFE to capture the correct function in the closure
-      (function(fn){ link.onclick = fn; })(items[i].fn);
+      // check login state before calling
+      (function(fn){
+        link.onclick = function(e) {
+          if (!userIsLoggedIn()) {
+            alert('Error: You have to be logged in to create items.');
+            return;
+          }
+          fn();
+        };
+      })(items[i].fn);
       submenu.appendChild(link);
     }
 
     // Attach submenu to main container and add to sidebar
     container.appendChild(submenu);
-    sidebarContainer.appendChild(container);
+    // If using floating fallback, append to body and style as fixed button
+    if (useFloatingFallback) {
+      container.style.position = 'fixed';
+      container.style.bottom = '20px';
+      container.style.left = '20px';
+      container.style.zIndex = 10000;
+      container.style.backgroundColor = '#fff';
+      container.style.border = '1px solid #ccc';
+      container.style.padding = '6px';
+      container.style.borderRadius = '4px';
+      container.style.display = 'flex';
+      container.style.alignItems = 'center';
+      container.style.justifyContent = 'center';
+      container.style.gap = '6px';
+      container.style.minWidth = '140px';
+      container.style.boxShadow = '0 4px 12px rgba(0,0,0,0.18)';
+      // Adjust submenu to open above the floating button
+      submenu.style.top = 'auto';
+      submenu.style.bottom = '100%';
+      submenu.style.left = '0';
+      document.body.appendChild(container);
+      // Ensure mainLink is visible on different themes
+      try {
+        mainLink.style.color = '#000';
+        mainLink.style.fontWeight = '600';
+        mainLink.style.fontSize = '13px';
+        mainLink.style.display = 'inline-block';
+        mainLink.style.padding = '4px 8px';
+      } catch (e) {}
+      console.log('ProductionPortalMenu: appended floating container to body');
+    } else {
+      // Append to an appropriate place in the sidebar.
+      if (isVector) {
+        // Prefer the vector menu list if present
+        var place = sidebarContainer.querySelector && (sidebarContainer.querySelector('.vector-menu-content-list') || sidebarContainer.querySelector('.vector-menu-content') || sidebarContainer.querySelector('.menu__list'));
+        try {
+          if (place && place.tagName && place.tagName.toLowerCase() === 'ul') {
+            // Create an li compatible with other vector menu items and append a nested <ul> inside it
+            var li = document.createElement('li');
+            li.id = 'n-t-mardi_create_item';
+            li.className = 'mw-list-item';
+            var a = document.createElement('a');
+            a.href = '#';
+            // toggle nested submenu visibility on click; start collapsed
+            a.onclick = function(e){
+              e.preventDefault();
+              if (nested.style.display === 'none') {
+                nested.style.display = 'block';
+                a.setAttribute('aria-expanded', 'true');
+              } else {
+                nested.style.display = 'none';
+                a.setAttribute('aria-expanded', 'false');
+              }
+            };
+            var span = document.createElement('span');
+            span.textContent = 'Create MathModDB Item';
+            a.appendChild(span);
+            li.appendChild(a);
+            // Create a nested list matching Vector structure for submenu entries
+            var nested = document.createElement('ul');
+            nested.className = 'vector-menu-content-list';
+            // start collapsed so the submenu is closed on initial load
+            nested.style.display = 'none';
+            nested.style.marginLeft = '8px';
+            nested.style.paddingLeft = '8px';
+            a.setAttribute('aria-expanded', 'false');
+            nested.setAttribute('role', 'menu');
+            for (var j = 0; j < items.length; j++) {
+              (function(fn, text) {
+                var subli = document.createElement('li');
+                subli.className = 'mw-list-item';
+                subli.style.listStyle = 'none';
+                subli.style.paddingLeft = '8px';
+                var suba = document.createElement('a');
+                suba.href = '#';
+                suba.onclick = function(e) { 
+                  e.preventDefault();
+                  if (!userIsLoggedIn()) {
+                    alert('Error: You have to be logged in to create items.');
+                    return;
+                  }
+                  fn();
+                };
+                var subspan = document.createElement('span');
+                subspan.textContent = text;
+                suba.appendChild(subspan);
+                subli.appendChild(suba);
+                nested.appendChild(subli);
+              })(items[j].fn, items[j].text);
+            }
+            li.appendChild(nested);
+            place.appendChild(li);
+            // Ensure skin scripts don't auto-expand: enforce collapsed state after skin runs
+            setTimeout(function() {
+              try {
+                nested.style.display = 'none';
+                a.setAttribute('aria-expanded', 'false');
+                li.classList.remove('vector-menu-item-expanded');
+              } catch (e) {}
+            }, 250);
+            console.log('ProductionPortalMenu: appended li with nested list to vector menu list');
+          } else if (place) {
+            place.appendChild(container);
+            console.log('ProductionPortalMenu: appended container to vector place (non-list)');
+          } else {
+            sidebarContainer.appendChild(container);
+            console.log('ProductionPortalMenu: appended container to sidebarContainer (no place)');
+          }
+        } catch (e) {
+          sidebarContainer.appendChild(container);
+          console.log('ProductionPortalMenu: append to sidebar failed, fallback append', e);
+        }
+      } else {
+        sidebarContainer.appendChild(container);
+      }
+    }
 
     // EVENT HANDLERS: Toggle and close submenu
-    // Click on main link toggles submenu visibility
-    mainLink.onclick = function() {
-      submenu.style.display = (submenu.style.display === 'none') ? 'flex' : 'none';
-    };
+    // For non-Vector skins or fallback, use mainLink click handler
+    if (!isVector || useFloatingFallback) {
+      mainLink.onclick = function() {
+        submenu.style.display = (submenu.style.display === 'none') ? 'flex' : 'none';
+      };
+    }
 
     // Close submenu if user clicks anywhere outside the dropdown (improves UX)
     document.addEventListener('click', function(e) {
@@ -160,12 +326,57 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createAcademicDiscipline() {
     createItem({
-      labelPrompt: 'Enter new academic discipline label (English):',
-      descPrompt: 'Enter new academic discipline description (English, should not be empty):',
+      labelPrompt: 'Enter new academic discipline label (English, should not be empty):',
+      descPrompt: 'Enter new academic discipline description (English, may be empty):',
       claims: {
         P31: { numericId: 60231 }, // instance of academic discipline (Q60231)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
         P1460: { numericId: 6534268 } // MaRDI academic discipline profile (Q6534268)
+      }
+    });
+  }
+
+  /**
+   * Creates a new Research Problem item
+   */
+  function createResearchProblem() {
+    createItem({
+      labelPrompt: 'Enter new research problem label (English, should not be empty):',
+      descPrompt: 'Enter new research problem description (English, may be empty):',
+      claims: {
+        P31: { numericId: 6534292 }, // instance of research problem (Q6534292)
+        P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
+        P1460: { numericId: 6534269 }  // MaRDI research problem profile (Q6534269)
+      }
+    });
+  }
+
+  /**
+   * Creates a new Mathematical Model item
+   */
+  function createMathematicalModel() {
+    createItem({
+      labelPrompt: 'Enter new mathematical model label (English, should not be empty):',
+      descPrompt: 'Enter new mathematical model description (English, may be empty):',
+      claims: {
+        P31: { numericId: 68663 }, // instance of mathematical model (Q68663)
+        P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
+        P1460: { numericId: 6534270 } // MaRDI mathematical model profile (Q6534270)
+      }
+    });
+  }
+  
+  /**
+   * Creates a new Computational Task item
+   */
+  function createComputationalTask() {
+    createItem({
+      labelPrompt: 'Enter new computational task label (English, should not be empty):',
+      descPrompt: 'Enter new computational task description (English, may be empty):',
+      claims: {
+        P31:   { numericId: 6534247 },  // instance of computational task (Q6534247)
+        P1495: { numericId: 6534265 },  // community MathModDB (Q6534265)
+        P1460: { numericId: 6534272 }   // MaRDI task profile (Q6534272)
       }
     });
   }
@@ -176,7 +387,7 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createMathematicalExpression() {
     createItem({
-      labelPrompt: 'Enter new mathematical expression label (English):',
+      labelPrompt: 'Enter new mathematical expression label (English, should not be empty):',
       descPrompt: 'Enter new mathematical expression description (English, may be empty):',
       // Extra field for the defining formula - optional property for this item type
       extraPrompt: { key: 'P989', prompt: 'Enter the defining formula (LaTeX without $..$, may be empty):' },
@@ -189,27 +400,12 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
   }
 
   /**
-   * Creates a new Mathematical Model item
-   */
-  function createMathematicalModel() {
-    createItem({
-      labelPrompt: 'Enter new mathematical model label (English):',
-      descPrompt: 'Enter new mathematical model description (English, should not be empty):',
-      claims: {
-        P31: { numericId: 68663 }, // instance of mathematical model (Q68663)
-        P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
-        P1460: { numericId: 6534270 } // MaRDI mathematical model profile (Q6534270)
-      }
-    });
-  }
-
-  /**
    * Creates a new Quantity item
    */
   function createQuantity() {
     createItem({
-      labelPrompt: 'Enter new quantity label (English):',
-      descPrompt: 'Enter new quantity description (English, should not be empty):',
+      labelPrompt: 'Enter new quantity label (English, should not be empty):',
+      descPrompt: 'Enter new quantity description (English, may be empty):',
       claims: {
         P31: { numericId: 6534237 }, // instance of quantity (Q6534237)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
@@ -223,8 +419,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createQuantityKind() {
     createItem({
-      labelPrompt: 'Enter new quantity kind label (English):',
-      descPrompt: 'Enter new quantity kind description (English, should not be empty):',
+      labelPrompt: 'Enter new quantity kind label (English, should not be empty):',
+      descPrompt: 'Enter new quantity kind description (English, may be empty):',
       claims: {
         P31: { numericId: 6534245 }, // instance of quantity kind (Q6534245)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
@@ -233,174 +429,195 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
     });
   }
 
-  /**
-   * Creates a new Research Problem item
-   */
-  function createResearchProblem() {
-    createItem({
-      labelPrompt: 'Enter new research problem label (English):',
-      descPrompt: 'Enter new research problem description (English, should not be empty):',
-      claims: {
-        P31: { numericId: 6534292 }, // instance of research problem (Q6534292)
-        P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
-        P1460: { numericId: 6534269 }  // MaRDI research problem profile (Q6534269)
-      }
-    });
-  }
-  
-  /**
-   * Creates a new Computational Task item
-   */
-  function createComputationalTask() {
-    createItem({
-      labelPrompt: 'Enter new computational task label (English):',
-      descPrompt: 'Enter new computational task description (English, should not be empty):',
-      claims: {
-        P31:   { numericId: 6534247 },  // instance of computational task (Q6534247)
-        P1495: { numericId: 6534265 },  // community MathModDB (Q6534265)
-        P1460: { numericId: 6534272 }   // MaRDI task profile (Q6534272)
-      }
-    });
-  }
-
   // ==================================================
-  // DUPLICATE DETECTION: Prevent creating items with existing labels
+  // DUPLICATE DETECTION: Prevent creating items with identical label AND description
   // ==================================================
   /**
-   * Checks if a label already exists in the database
-   * Searches across all languages and aliases for potential duplicates
+   * Checks if items with the same label and description already exist
+   * Only reports as duplicate if BOTH label and description match
    * 
    * @param {string} label - The label to check
+   * @param {string} description - The description to check
    * @param {Object} opts - Options object:
    *   - verbose: {boolean} Show alerts with details if duplicate found
    *   - strictLang: {string} Only check this language (e.g., 'en')
-   *   - requireExact: {boolean} True = only report exact matches, False = include partial matches
    * 
    * @returns {Object} Result object:
-   *   - exists: {boolean} Whether a potential duplicate was found
-   *   - exact: {boolean} Whether it's an exact match or fuzzy match
-   *   - match: {Object} First matched item info {id, label, lang, alias?}
-   *   - all: {Array} All fuzzy matches if any
+   *   - exists: {boolean} Whether a true duplicate (label + description) was found
+   *   - matchType: 'both' or 'label' - what matched
+   *   - match: {Object} Matched item info {id, label, description?, lang}
    *   - error: {Error} Error object if API call failed
    */
-  async function checkDuplicateLabel(label, opts) {
-    // Parse options with defaults
+  async function checkDuplicateLabelAndDescription(label, description, opts) {
     opts = opts || {};
-    var verbose = !!opts.verbose;  // Show alerts for duplicates
-    var strictLang = opts.strictLang || (MARDI_DUPLICATE_CHECK_STRICT_EN ? 'en' : null);  // Language filter
-    var requireExact = (opts.requireExact !== undefined) ? !!opts.requireExact : true;  // Exact vs fuzzy match
-    
-    // Handle empty label
+    var verbose = !!opts.verbose;
+    var strictLang = opts.strictLang || (MARDI_DUPLICATE_CHECK_STRICT_EN ? 'en' : null);
     if (!label) return { exists: false };
-    
     var api = new mw.Api();
+
     try {
-      // STEP 1: Perform initial search using the Wikibase search API
       var res = await api.get({
         action: 'wbsearchentities',
         search: label,
         language: 'en',
         type: 'item',
-        limit: 20,  // Get up to 20 results
+        limit: 20,
         format: 'json'
       });
-      
-      // Return if no results found
       if (!res || !res.search || res.search.length === 0) return { exists: false };
 
-      // STEP 2: Fetch full entity data to check labels and aliases in all languages
+      // Fetch full entities to inspect labels/descriptions in all languages
       var ids = res.search.map(function(s){ return s.id; }).join('|');
       var ents = await api.get({
         action: 'wbgetentities',
         ids: ids,
-        props: 'labels|aliases',  // Get both labels and alternative names
+        props: 'labels|aliases|descriptions',
         format: 'json'
       });
 
-      // STEP 3: Compare search results with input label (case-insensitive)
-      var lower = label.toLowerCase();  // Normalize for comparison
-      var exactMatch = null;
-      var fuzzyMatches = [];  // Store partial/substring matches
+      var lowerLabel = label.toLowerCase();
+      var lowerDesc = description ? description.toLowerCase() : '';
+      var exactLabelMatch = null;
+      var exactBothMatch = null;
 
-      // Iterate through all entities returned from search
       for (var eid in ents.entities) {
         var ent = ents.entities[eid];
         if (!ent) continue;
-        
-        // Check official labels in all languages
+        var foundLabelMatch = false;
+        var foundDescMatch = false;
+        var matchLang = null;
+
+        // Check labels
         if (ent.labels) {
           for (var lang in ent.labels) {
             var lab = ent.labels[lang].value;
             if (!lab) continue;
             var labLower = lab.toLowerCase();
-            
-            // Exact match: label matches exactly (and language matches if strictLang is set)
-            if (labLower === lower && (!strictLang || lang === strictLang)) {
-              exactMatch = { id: ent.id, label: lab, lang: lang };
+            if (labLower === lowerLabel && (!strictLang || lang === strictLang)) {
+              foundLabelMatch = true;
+              matchLang = lang;
+              if (!exactLabelMatch) {
+                exactLabelMatch = { id: ent.id, label: lab, lang: lang };
+              }
               break;
-            } 
-            // Fuzzy match: label contains the search term
-            else if ((!strictLang || lang === strictLang) && labLower.indexOf(lower) !== -1) {
-              fuzzyMatches.push({ id: ent.id, label: lab, lang: lang });
             }
           }
         }
-        if (exactMatch) break;  // Stop searching if exact match found
-        
-        // Check aliases (alternative names/synonyms) in all languages
-        if (ent.aliases) {
-          for (var lang2 in ent.aliases) {
-            var alist = ent.aliases[lang2];
-            for (var j = 0; j < alist.length; j++) {
-              var al = alist[j].value;
-              if (!al) continue;
-              var alLower = al.toLowerCase();
-              
-              // Exact match in aliases
-              if (alLower === lower && (!strictLang || lang2 === strictLang)) {
-                exactMatch = { id: ent.id, label: al, lang: lang2, alias: true };
-                break;
-              }
-              // Fuzzy match in aliases
-              else if ((!strictLang || lang2 === strictLang) && alLower.indexOf(lower) !== -1) {
-                fuzzyMatches.push({ id: ent.id, label: al, lang: lang2, alias: true });
+
+        // If we found a label match, check descriptions
+        if (foundLabelMatch) {
+          if (lowerDesc) {
+            // User provided a description, check for exact match
+            if (ent.descriptions) {
+              for (var dlang in ent.descriptions) {
+                var desc = ent.descriptions[dlang].value;
+                if (!desc) continue;
+                var descLower = desc.toLowerCase();
+                if (descLower === lowerDesc && (!strictLang || dlang === strictLang)) {
+                  foundDescMatch = true;
+                  exactBothMatch = { 
+                    id: ent.id, 
+                    label: exactLabelMatch.label, 
+                    description: desc,
+                    lang: matchLang || dlang
+                  };
+                  break;
+                }
               }
             }
-            if (exactMatch) break;  // Stop if exact match found
+          } else {
+            // User did NOT provide description, check if existing item also has no description
+            var hasExistingDesc = false;
+            if (ent.descriptions) {
+              for (var dlang in ent.descriptions) {
+                var desc = ent.descriptions[dlang].value;
+                if (desc && desc.trim()) {
+                  hasExistingDesc = true;
+                  break;
+                }
+              }
+            }
+            if (!hasExistingDesc) {
+              // Both have no/empty description, so they match on both label and description
+              foundDescMatch = true;
+              exactBothMatch = { 
+                id: ent.id, 
+                label: exactLabelMatch.label, 
+                description: '(empty)',
+                lang: matchLang
+              };
+            }
           }
         }
-        if (exactMatch) break;  // Stop iterating entities if exact match found
+
+        if (exactBothMatch) break;
       }
 
-      // STEP 4: Return results based on matches found
-      if (exactMatch) {
-        // Exact match found - label already exists
-        if (verbose) alert('Exact match found: ' + exactMatch.label + ' (Item:' + exactMatch.id + ', lang=' + exactMatch.lang + ')');
-        console.log('checkDuplicateLabel: exact match', exactMatch);
-        return { exists: true, exact: true, match: exactMatch };
+      // Check for both label and description match first
+      if (exactBothMatch) {
+        return { exists: true, matchType: 'both', match: exactBothMatch };
       }
 
-      // If not requiring exact match and fuzzy matches exist, report them
-      if (!requireExact && fuzzyMatches.length) {
+      // Check for label-only match (report but don't block)
+      if (exactLabelMatch) {
         if (verbose) {
-          var msg2 = 'Ähnliche Items gefunden:\n';
-          for (var k2 = 0; k2 < fuzzyMatches.length; k2++) {
-            msg2 += fuzzyMatches[k2].label + ' (Item:' + fuzzyMatches[k2].id + ', lang=' + fuzzyMatches[k2].lang + ')\n';
-          }
-          alert(msg2);
+          var msgL = 'An item with the same label already exists:\n';
+          msgL += '"' + exactLabelMatch.label + '"\n';
+          msgL += '(Item: ' + exactLabelMatch.id + ')';
+          alert(msgL);
         }
-        console.log('checkDuplicateLabel: fuzzy matches', fuzzyMatches);
-        return { exists: true, exact: false, match: fuzzyMatches[0], all: fuzzyMatches };
+        return { exists: true, matchType: 'label', match: exactLabelMatch };
       }
 
-      // No duplicate found according to specified criteria
-      console.log('checkDuplicateLabel: no duplicate found (strictLang=' + strictLang + ', requireExact=' + requireExact + ')');
+      // No duplicate found
       return { exists: false };
     } catch (e) {
-      // API error occurred - log it but allow item creation to proceed
-      console.error('Label check failed:', e);
+      console.error('Duplicate check failed:', e);
       return { exists: false, error: e };
     }
+  }
+
+  // Helper to display visual warning for exact duplicates (label + description)
+  function showDuplicateOverlay(url) {
+    var overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    overlay.style.zIndex = '100000';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+
+    var box = document.createElement('div');
+    box.style.backgroundColor = '#fff';
+    box.style.padding = '20px';
+    box.style.borderRadius = '5px';
+    box.style.maxWidth = '90%';
+    box.style.textAlign = 'center';
+
+    var p = document.createElement('p');
+    p.innerHTML = '<strong>ERROR:</strong> An item with the same label and description already exists.';
+    box.appendChild(p);
+
+    var link = document.createElement('a');
+    link.href = url;
+    link.textContent = url;
+    link.target = '_blank';
+    link.style.wordBreak = 'break-all';
+    box.appendChild(link);
+
+    box.appendChild(document.createElement('br'));
+    var btn = document.createElement('button');
+    btn.textContent = 'Close';
+    btn.style.marginTop = '10px';
+    btn.onclick = function() { document.body.removeChild(overlay); };
+    box.appendChild(btn);
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
   }
 
   // ==================================================
@@ -419,43 +636,62 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    *       - prompt: Question to ask user for this property value
    */
   async function createItem(opts) {
+    // bail out early if no authenticated user (prevents prompts from appearing)
+    if (!userIsLoggedIn()) {
+      alert('Error: You have to be logged in to create items.');
+      return;
+    }
+
     var api = new mw.Api();
     var label;
     
-    // PHASE 1: Collect label from user (keep asking until non-empty)
-    do {
-      label = prompt(opts.labelPrompt);
-      if (label === null) return;  // User cancelled
+    // PHASE 1: Collect label from user - loop until valid label provided
+    while (true) {
+      label = prompt('We appreciate it if you create a label and a description for all of your new items. Every new item should have at least a label.\n\n' + opts.labelPrompt);
+      if (label === null) return;  // Cancel button pressed - exit creation process
       label = label.trim();
-    } while (!label);  // Loop until user provides non-empty label
-
-    // PHASE 2: Check for duplicate labels to prevent accidental duplicates
-    try {
-      var dup = await checkDuplicateLabel(label, { 
-        verbose: MARDI_DUPLICATE_CHECK_VERBOSE, 
-        strictLang: (MARDI_DUPLICATE_CHECK_STRICT_EN ? 'en' : null), 
-        requireExact: true 
-      });
-      
-      if (dup && dup.exists) {
-        // Duplicate found - warn user but allow override
-        var msg = 'An item with the label "' + label + '" appears to already exist.';
-        if (dup.exact && dup.match && dup.match.id) msg += ' (Exact match: Item:' + dup.match.id + ')';
-        else if (dup.match && dup.match.id) msg += ' (Similar match: Item:' + dup.match.id + ')';
-        // If verbose mode, user already saw detailed alerts about the duplicate
-        msg += '\n\nCreate anyway?';
-        if (!confirm(msg)) return;  // User chose not to create duplicate
-      }
-    } catch (e) {
-      console.warn('Error during duplicate check:', e);
-      // Continue despite error - don't block item creation
+      if (label) break;  // Valid label provided, exit loop
+      alert('Label is required to create an item. Please try again.');
     }
 
-    // PHASE 3: Collect description and optional extra field
+    // PHASE 1b: Collect aliases (pipe-separated)
+    var aliasInput = prompt('Enter aliases (pipe-separated, English, may be empty):');
+    if (aliasInput === null) return; // user pressed cancel - abort creation
+    var aliases = [];
+    if (aliasInput && aliasInput.trim()) {
+      aliases = aliasInput.split('|').map(function(a){ return a.trim(); }).filter(function(a){ return a; });
+    }
+
+    // PHASE 2: Collect description and optional extra field
     var description = prompt(opts.descPrompt);
+    if (description === null) return; // user pressed cancel - abort creation
     var extraValue;
     if (opts.extraPrompt) {
       extraValue = prompt(opts.extraPrompt.prompt);
+      if (extraValue === null) return; // user pressed cancel - abort creation
+    }
+
+    // PHASE 2b: Ensure at least one of label/description/aliases present
+    if ((!label || label.trim()==='') && (!description || !description.trim()) && aliases.length === 0) {
+      alert('You need to fill at least either label, description or aliases.');
+      return;
+    }
+
+    // PHASE 3: Check for duplicates with same label AND description
+    if (label && label.trim()) {
+      try {
+        var dup = await checkDuplicateLabelAndDescription(label, description, { 
+          verbose: MARDI_DUPLICATE_CHECK_VERBOSE, 
+          strictLang: (MARDI_DUPLICATE_CHECK_STRICT_EN ? 'en' : null)
+        });
+        if (dup && dup.exists && dup.matchType === 'both') {
+          var url = 'https://portal.mardi4nfdi.de/wiki/Item:' + dup.match.id;
+          showDuplicateOverlay(url);
+          return;
+        }
+      } catch (e) {
+        console.warn('Error during duplicate check:', e);
+      }
     }
 
     // PHASE 4: Final confirmation before creating item
@@ -469,6 +705,13 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
         descriptions: {},  // Will be populated if description provided
         claims: {}  // Will be populated with property claims
       };
+      // add aliases if any were provided
+      if (aliases && aliases.length) {
+        data.aliases = { en: [] };
+        aliases.forEach(function(a) {
+          data.aliases.en.push({ language: 'en', value: a });
+        });
+      }
 
       // Add property claims from configuration (e.g., instance of, community, profile)
       for (var prop in opts.claims) {
@@ -522,10 +765,10 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
       // PHASE 7: Handle successful creation
       if (result && result.entity && result.entity.id) {
         // Item created successfully - wait briefly so creation finalizes, then navigate
-        console.log('Item created: ' + result.entity.id + ' — redirecting in 3.5s');
+        console.log('Item created: ' + result.entity.id + ' — redirecting in 4s');
         setTimeout(function() {
           window.location.href = '/wiki/Item:' + result.entity.id;
-        }, 3500); // 3500 ms delay to allow backend processes to complete
+        }, 4000); // 4000 ms delay to allow backend processes to complete
         return;
       }
 
