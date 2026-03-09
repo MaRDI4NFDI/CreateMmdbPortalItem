@@ -326,8 +326,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createAcademicDiscipline() {
     createItem({
-      labelPrompt: 'Enter new academic discipline label (small letters, English, should not be empty):',
-      descPrompt: 'Enter new academic discipline description (small letters, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new academic discipline label (lower case, English, should not be empty):',
+      descPrompt: 'Enter new academic discipline description (lower case, 2 - 12 words, English, may be empty):',
       claims: {
         P31: { numericId: 60231 }, // instance of academic discipline (Q60231)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
@@ -341,8 +341,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createResearchProblem() {
     createItem({
-      labelPrompt: 'Enter new research problem label (small letters, English, should not be empty):',
-      descPrompt: 'Enter new research problem description (small letters, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new research problem label (lower case, English, should not be empty):',
+      descPrompt: 'Enter new research problem description (lower case, 2 - 12 words, English, may be empty):',
       claims: {
         P31: { numericId: 6534292 }, // instance of research problem (Q6534292)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
@@ -356,8 +356,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createMathematicalModel() {
     createItem({
-      labelPrompt: 'Enter new mathematical model label (small letters, English, should not be empty):',
-      descPrompt: 'Enter new mathematical model description (small letters, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new mathematical model label (lower case, English, should not be empty):',
+      descPrompt: 'Enter new mathematical model description (lower case, 2 - 12 words, English, may be empty):',
       claims: {
         P31: { numericId: 68663 }, // instance of mathematical model (Q68663)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
@@ -371,8 +371,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createComputationalTask() {
     createItem({
-      labelPrompt: 'Enter new computational task label (small letters, English, should not be empty):',
-      descPrompt: 'Enter new computational task description (small letters, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new computational task label (lower case, English, should not be empty):',
+      descPrompt: 'Enter new computational task description (lower case, 2 - 12 words, English, may be empty):',
       claims: {
         P31:   { numericId: 6534247 },  // instance of computational task (Q6534247)
         P1495: { numericId: 6534265 },  // community MathModDB (Q6534265)
@@ -387,8 +387,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createMathematicalExpression() {
     createItem({
-      labelPrompt: 'Enter new mathematical expression label (small letters, English, should not be empty):',
-      descPrompt: 'Enter new mathematical expression description (small letters, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new mathematical expression label (lower case, English, should not be empty):',
+      descPrompt: 'Enter new mathematical expression description (lower case, 2 - 12 words, English, may be empty):',
       // Extra field for the defining formula - optional property for this item type
       extraPrompt: { key: 'P989', prompt: 'Enter the defining formula (LaTeX without $..$, may be empty):' },
       claims: {
@@ -404,8 +404,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createQuantity() {
     createItem({
-      labelPrompt: 'Enter new quantity label (small letters, English, should not be empty):',
-      descPrompt: 'Enter new quantity description (small letters, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new quantity label (lower case, English, should not be empty):',
+      descPrompt: 'Enter new quantity description (lower case, 2 - 12 words, English, may be empty):',
       claims: {
         P31: { numericId: 6534237 }, // instance of quantity (Q6534237)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
@@ -419,8 +419,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createQuantityKind() {
     createItem({
-      labelPrompt: 'Enter new quantity kind label (small letters, English, should not be empty):',
-      descPrompt: 'Enter new quantity kind description (small letters, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new quantity kind label (lower case, English, should not be empty):',
+      descPrompt: 'Enter new quantity kind description (lower case, 2 - 12 words, English, may be empty):',
       claims: {
         P31: { numericId: 6534245 }, // instance of quantity kind (Q6534245)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
