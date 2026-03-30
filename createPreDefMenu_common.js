@@ -1,7 +1,7 @@
 /* 
 
 Navigation menu for creating MaRDI items (all types) in the MaRDI Portal 
-with predefined values, duplicate label and log in check.
+with predefined values, duplicate label and log-in check.
 
 Code by Björn Schembera & Aurela Shehu within the MaRDI project.
 
@@ -120,7 +120,7 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
     betaNote.style.color = '#333';
     betaNote.style.borderBottom = '1px solid #eee';
     betaNote.style.backgroundColor = '#fafafa';
-    betaNote.innerHTML = 'Create new item...';
+    betaNote.innerHTML = 'Explore <a href="https://portal.mardi4nfdi.de/wiki/MathModDB">MathModDB</a>. <br>Or create a new item...';
     submenu.appendChild(betaNote);
 
     // MENU ITEMS: Define which item types can be created
@@ -326,8 +326,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createAcademicDiscipline() {
     createItem({
-      labelPrompt: 'Enter new academic discipline label (lower case, English, should not be empty):',
-      descPrompt: 'Enter new academic discipline description (lower case, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new academic discipline label (lower case, English, mandatory):',
+      descPrompt: 'Enter new academic discipline description (lower case, 2 - 12 words, English, optional):',
       claims: {
         P31: { numericId: 60231 }, // instance of academic discipline (Q60231)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
@@ -341,8 +341,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createResearchProblem() {
     createItem({
-      labelPrompt: 'Enter new research problem label (lower case, English, should not be empty):',
-      descPrompt: 'Enter new research problem description (lower case, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new research problem label (lower case, English, mandatory):',
+      descPrompt: 'Enter new research problem description (lower case, 2 - 12 words, English, optional):',
       claims: {
         P31: { numericId: 6534292 }, // instance of research problem (Q6534292)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
@@ -356,8 +356,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createMathematicalModel() {
     createItem({
-      labelPrompt: 'Enter new mathematical model label (lower case, English, should not be empty):',
-      descPrompt: 'Enter new mathematical model description (lower case, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new mathematical model label (lower case, English, mandatory):',
+      descPrompt: 'Enter new mathematical model description (lower case, 2 - 12 words, English, optional):',
       claims: {
         P31: { numericId: 68663 }, // instance of mathematical model (Q68663)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
@@ -371,8 +371,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createComputationalTask() {
     createItem({
-      labelPrompt: 'Enter new computational task label (lower case, English, should not be empty):',
-      descPrompt: 'Enter new computational task description (lower case, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new computational task label (lower case, English, mandatory):',
+      descPrompt: 'Enter new computational task description (lower case, 2 - 12 words, English, optional):',
       claims: {
         P31:   { numericId: 6534247 },  // instance of computational task (Q6534247)
         P1495: { numericId: 6534265 },  // community MathModDB (Q6534265)
@@ -387,10 +387,10 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createMathematicalExpression() {
     createItem({
-      labelPrompt: 'Enter new mathematical expression label (lower case, English, should not be empty):',
-      descPrompt: 'Enter new mathematical expression description (lower case, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new mathematical expression label (lower case, English, mandatory):',
+      descPrompt: 'Enter new mathematical expression description (lower case, 2 - 12 words, English, optional):',
       // Extra field for the defining formula - optional property for this item type
-      extraPrompt: { key: 'P989', prompt: 'Enter the defining formula (LaTeX without $..$, may be empty):' },
+      extraPrompt: { key: 'P989', prompt: 'Enter the defining formula (LaTeX without $..$, optional):' },
       claims: {
         P31: { numericId: 6481152  }, // instance of mathematical expression (Q6481152)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
@@ -404,8 +404,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createQuantity() {
     createItem({
-      labelPrompt: 'Enter new quantity label (lower case, English, should not be empty):',
-      descPrompt: 'Enter new quantity description (lower case, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new quantity label (lower case, English, mandatory):',
+      descPrompt: 'Enter new quantity description (lower case, 2 - 12 words, English, optional):',
       claims: {
         P31: { numericId: 6534237 }, // instance of quantity (Q6534237)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
@@ -419,8 +419,8 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
    */
   function createQuantityKind() {
     createItem({
-      labelPrompt: 'Enter new quantity kind label (lower case, English, should not be empty):',
-      descPrompt: 'Enter new quantity kind description (lower case, 2 - 12 words, English, may be empty):',
+      labelPrompt: 'Enter new quantity kind label (lower case, English, mandatory):',
+      descPrompt: 'Enter new quantity kind description (lower case, 2 - 12 words, English, optional):',
       claims: {
         P31: { numericId: 6534245 }, // instance of quantity kind (Q6534245)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
@@ -621,20 +621,120 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
   }
 
   // ==================================================
-  // ITEM CREATION: Main function to create any item type
+  // MODAL DIALOG: Custom modal for user input (replaces prompt)
   // ==================================================
   /**
-   * Generic item creation function used by all item type creators
-   * Handles user input collection, duplicate checking, and API communication
-   * 
-   * @param {Object} opts - Configuration object:
-   *   - labelPrompt: {string} Prompt text asking for item label
-   *   - descPrompt: {string} Prompt text asking for item description
-   *   - claims: {Object} Properties and values to add to the item (P31, P1495, P1460, etc.)
-   *   - extraPrompt: {Object} Optional - Additional property:
-   *       - key: Property identifier (e.g., 'P29')
-   *       - prompt: Question to ask user for this property value
+   * Shows a custom modal dialog for collecting user input
+   * @param {Object} fields - Array of field objects: {label, placeholder, required, defaultValue}
+   * @returns {Promise} Resolves to object with field values or null if cancelled
    */
+  function showInputModal(fields) {
+    return new Promise((resolve) => {
+      // Create overlay
+      const overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100%';
+      overlay.style.height = '100%';
+      overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      overlay.style.zIndex = '100000';
+      overlay.style.display = 'flex';
+      overlay.style.alignItems = 'center';
+      overlay.style.justifyContent = 'center';
+
+      // Create modal box
+      const box = document.createElement('div');
+      box.style.backgroundColor = '#fff';
+      box.style.padding = '20px';
+      box.style.borderRadius = '5px';
+      box.style.maxWidth = '600px';
+      box.style.width = '90%';
+      box.style.maxHeight = '80vh';
+      box.style.overflowY = 'auto';
+
+      // Title
+      const title = document.createElement('h3');
+      title.textContent = 'Create New Item';
+      title.style.marginTop = '0';
+      box.appendChild(title);
+
+      // Intro text
+      const intro = document.createElement('p');
+      intro.textContent = 'We appreciate it if you create a label and a description for all of your new items. Every new item should have at least a label.';
+      box.appendChild(intro);
+
+      // Form
+      const form = document.createElement('form');
+      const inputs = {};
+
+      fields.forEach(field => {
+        const labelEl = document.createElement('label');
+        labelEl.textContent = field.label;
+        labelEl.style.display = 'block';
+        labelEl.style.marginBottom = '5px';
+        labelEl.style.fontWeight = 'bold';
+        form.appendChild(labelEl);
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = field.placeholder || '';
+        input.value = field.defaultValue || '';
+        input.style.width = '100%';
+        input.style.padding = '8px';
+        input.style.marginBottom = '15px';
+        input.style.border = '1px solid #ccc';
+        input.style.borderRadius = '3px';
+        inputs[field.key] = input;
+        form.appendChild(input);
+      });
+
+      box.appendChild(form);
+
+      // Buttons
+      const btnContainer = document.createElement('div');
+      btnContainer.style.textAlign = 'right';
+      btnContainer.style.marginTop = '20px';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.type = 'button';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.marginRight = '10px';
+      cancelBtn.onclick = () => {
+        document.body.removeChild(overlay);
+        resolve(null);
+      };
+
+      const okBtn = document.createElement('button');
+      okBtn.type = 'button';
+      okBtn.textContent = 'Create Item';
+      okBtn.onclick = () => {
+        const values = {};
+        let valid = true;
+        fields.forEach(field => {
+          const val = inputs[field.key].value.trim();
+          if (field.required && !val) {
+            alert(field.label + ' is required.');
+            valid = false;
+          }
+          values[field.key] = val;
+        });
+        if (!valid) return;
+        document.body.removeChild(overlay);
+        resolve(values);
+      };
+
+      btnContainer.appendChild(cancelBtn);
+      btnContainer.appendChild(okBtn);
+      box.appendChild(btnContainer);
+
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+
+      // Focus first input
+      if (fields.length > 0) inputs[fields[0].key].focus();
+    });
+  }
   async function createItem(opts) {
     // bail out early if no authenticated user (prevents prompts from appearing)
     if (!userIsLoggedIn()) {
@@ -643,35 +743,33 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
     }
 
     var api = new mw.Api();
-    var label;
     
-    // PHASE 1: Collect label from user - loop until valid label provided
-    while (true) {
-      label = prompt('We appreciate it if you create a label and a description for all of your new items. Every new item should have at least a label.\n\n' + opts.labelPrompt);
-      if (label === null) return;  // Cancel button pressed - exit creation process
-      label = label.trim();
-      if (label) break;  // Valid label provided, exit loop
-      alert('Label is required to create an item. Please try again.');
+    // Prepare fields for modal
+    const fields = [
+      { key: 'label', label: opts.labelPrompt, placeholder: 'e.g., example label', required: true },
+      { key: 'aliases', label: 'Enter aliases (pipe-separated, English, optional):', placeholder: 'alias1|alias2|alias3' },
+      { key: 'description', label: opts.descPrompt, placeholder: 'e.g., a short description' }
+    ];
+    if (opts.extraPrompt) {
+      fields.push({ key: 'extra', label: opts.extraPrompt.prompt, placeholder: 'e.g., formula or value' });
     }
 
-    // PHASE 1b: Collect aliases (pipe-separated)
-    var aliasInput = prompt('Enter aliases (pipe-separated, English, may be empty):');
-    if (aliasInput === null) return; // user pressed cancel - abort creation
+    // Show modal and collect input
+    const values = await showInputModal(fields);
+    if (!values) return; // Cancelled
+
+    const label = values.label;
+    const aliasInput = values.aliases;
+    const description = values.description;
+    const extraValue = values.extra;
+
+    // Process aliases
     var aliases = [];
     if (aliasInput && aliasInput.trim()) {
       aliases = aliasInput.split('|').map(function(a){ return a.trim(); }).filter(function(a){ return a; });
     }
 
-    // PHASE 2: Collect description and optional extra field
-    var description = prompt(opts.descPrompt);
-    if (description === null) return; // user pressed cancel - abort creation
-    var extraValue;
-    if (opts.extraPrompt) {
-      extraValue = prompt(opts.extraPrompt.prompt);
-      if (extraValue === null) return; // user pressed cancel - abort creation
-    }
-
-    // PHASE 2b: Ensure at least one of label/description/aliases present
+    // Ensure at least one of label/description/aliases present
     if ((!label || label.trim()==='') && (!description || !description.trim()) && aliases.length === 0) {
       alert('You need to fill at least either label, description or aliases.');
       return;
