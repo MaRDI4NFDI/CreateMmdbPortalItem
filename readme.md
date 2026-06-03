@@ -7,7 +7,7 @@ Here are the specific presets for MathModDB Items:
 | Type                    | instance of | MaRDI profile type |
 | ----------------------- | ----------- | ------------------ |
 | Academic discipline     | Q60231      | Q6534268           |
-| Formula                 | Q6481152    | Q5981696           |
+| Formula                 | Q96183      | Q5981696           |
 | Mathematical model      | Q68663      | Q6534270           |
 | Quantity                | Q6534237    | Q6534271           |
 | Kind of Quantity        | Q6534245    | Q6534271           |
