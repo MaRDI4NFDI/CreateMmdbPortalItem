@@ -131,7 +131,7 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
       { text: 'Research Problem', fn: createResearchProblem },
       { text: 'Mathematical Model', fn: createMathematicalModel },
       { text: 'Computational Task', fn: createComputationalTask },
-      { text: 'Mathematical Expression', fn: createMathematicalExpression },
+      { text: 'Formula', fn: createFormula },
       { text: 'Quantity', fn: createQuantity },
       { text: 'Quantity Kind', fn: createQuantityKind }
       
@@ -382,19 +382,19 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
   }
 
   /**
-   * Creates a new Mathematical Expression item
+   * Creates a new Formula item
    * Includes extra prompt for "defining formula" (property P989)
    */
-  function createMathematicalExpression() {
+  function createFormula() {
     createItem({
-      labelPrompt: 'Enter new mathematical expression label (lower case, English, mandatory):',
-      descPrompt: 'Enter new mathematical expression description (lower case, 2 - 12 words, English, optional):',
+      labelPrompt: 'Enter new formula label (lower case, English, mandatory):',
+      descPrompt: 'Enter new formula description (lower case, 2 - 12 words, English, optional):',
       // Extra field for the defining formula - optional property for this item type
       extraPrompt: { key: 'P989', prompt: 'Enter the defining formula (LaTeX without $..$, optional):' },
       claims: {
-        P31: { numericId: 6481152  }, // instance of mathematical expression (Q6481152)
+        P31: { numericId: 96183 }, // instance of formula (Q96183)
         P1495: { numericId: 6534265 }, // community MathModDB (Q6534265)
-        P1460: { numericId: 5981696 } // MaRDI mathematical expression profile (Q5981696)
+        P1460: { numericId: 5981696 } // MaRDI formula profile (Q5981696)
       }
     });
   }
@@ -836,7 +836,7 @@ Code by Björn Schembera & Aurela Shehu within the MaRDI project.
         data.descriptions.en = { language: 'en', value: description.trim() };
       }
 
-      // Add extra property if configured (e.g., mathematical formula for expressions)
+      // Add extra property if configured (e.g., mathematical formula)
       if (opts.extraPrompt && extraValue && extraValue.trim()) {
         data.claims[opts.extraPrompt.key] = [{
           type: 'statement',
